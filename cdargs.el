@@ -34,7 +34,7 @@
 ;; somewhere where Emacs can find it (see variable load-path) and the
 ;; require it in your personal init file (may be one of ~/.emacs,
 ;; ~/.xemacs/init.el ~/.xemacs/my/config/personal.el or something
-;; else): 
+;; else):
 ;; (require 'cdargs)
 ;; This defines the function cdargs and an alias cv
 
@@ -42,7 +42,7 @@
 (defgroup cdargs nil
   "Jump to directories quickly."
   :tag "CDargs"
-  :link '(url-link :tag "Home Page" 
+  :link '(url-link :tag "Home Page"
                    "http://www.skamphausen.de/software/cdargs/")
   :link '(emacs-commentary-link
           :tag "Commentary in cdargs.el" "cdargs.el")
@@ -108,10 +108,35 @@ quick access."
 
 (defalias 'cv 'cdargs)
 
+(defun cdargs--compose-remote-prefix ()
+  (with-parsed-tramp-file-name default-directory parsed
+    (tramp-make-tramp-file-name
+     parsed-method
+     parsed-user
+     parsed-host
+     "" ;localname empty for now
+     parsed-hop)))
+
+(defun cdargs--compose-prefix ()
+  (if (tramp-tramp-file-p default-directory)
+      (cdargs--compose-remote-prefix)
+    ""))
+
+
+(defun cdargs--compose-local-file-name ()
+  (expand-file-name cdargs-list-file))
+
+(defun cdargs--compose-list-file-name (prefix)
+  (if (tramp-tramp-file-p default-directory)
+      (concat prefix cdargs-list-file)
+    (cdargs--compose-local-file-name)))
+
+
 (defun cdargs-make-list ()
   "Return an ALIST with descriptions and paths."
-  (let ((file (expand-file-name cdargs-list-file))
-        (the-list) (desc) (path) (start))
+  (let* ((prefix (cdargs--compose-prefix))
+         (file (cdargs--compose-list-file-name prefix))
+         (the-list) (desc) (path) (start))
     (when (file-readable-p file)
       (with-temp-buffer
         (insert-file-contents file)
@@ -125,7 +150,7 @@ quick access."
                                       (end-of-line)
                                       (point))))
           (setq the-list
-                (cons (cons desc path)
+                (cons (cons desc (concat prefix path))
                       the-list))
           (forward-line))))
     the-list))
