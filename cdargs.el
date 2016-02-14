@@ -54,6 +54,12 @@
   :type 'string
   :group 'cdargs)
 
+
+(defcustom cdargs-find-file-function 'find-file
+  "A function that will be used in dired-mode."
+  :type 'function
+  :group 'cdargs)
+
 (defcustom cdargs-warped-hook nil
   "List of function to run after changing to a directory with cdargs.
 For example it can be useful to add the `desktop-read' function here.
@@ -71,13 +77,18 @@ a desktop exists because otherwise it would delete all open buffers:
   :type 'hook
   :group 'cdargs)
 
+
+;;;###autoload
 (defun cdargs ()
-  "Change the current working directory using a bookmarks file.
+  "open a directory in dired (by default) using a bookmarks file.
 This function behaves similar to the command line program cdargs
 together with which it is distributed.
 You can use TAB completion and the usual history repeat keys for
 quick access."
   (interactive)
+  (cdargs-do-cdargs cdargs-find-file-function))
+
+(defun cdargs-do-cdargs (find-file-func)
   (let* ((alist (cdargs-make-list))
          (hist (mapcar 'car alist))
          (dir (cdr (assoc
@@ -85,7 +96,7 @@ quick access."
                      "warp to: " alist
                      nil t nil 'hist nil)
                     alist))))
-    (cd dir)
+    (funcall find-file-func dir)
     (run-hooks 'cdargs-warped-hook)))
 
 (defalias 'cv 'cdargs)
@@ -112,6 +123,7 @@ quick access."
           (forward-line))))
     the-list))
 
+;;;###autoload
 (defun cdargs-edit ()
   "Simply open the bookmarks file"
   (interactive)
