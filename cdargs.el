@@ -56,6 +56,11 @@
 
 
 (defcustom cdargs-find-file-function 'find-file
+  "A function that will be used for accessing bookmarked directory."
+  :type 'function
+  :group 'cdargs)
+
+(defcustom cdargs-dired-find-file-function 'find-alternate-file
   "A function that will be used in dired-mode."
   :type 'function
   :group 'cdargs)
@@ -86,7 +91,9 @@ together with which it is distributed.
 You can use TAB completion and the usual history repeat keys for
 quick access."
   (interactive)
-  (cdargs-do-cdargs cdargs-find-file-function))
+  (if (eq major-mode 'dired-mode)
+      (cdargs-do-cdargs cdargs-dired-find-file-function)
+    (cdargs-do-cdargs cdargs-find-file-function)))
 
 (defun cdargs-do-cdargs (find-file-func)
   (let* ((alist (cdargs-make-list))
@@ -115,8 +122,8 @@ quick access."
                  (point) (- (search-forward " /") 2)))
           (setq path (buffer-substring
                       (- (point) 1) (progn
-                                (end-of-line)
-                                (point))))
+                                      (end-of-line)
+                                      (point))))
           (setq the-list
                 (cons (cons desc path)
                       the-list))
