@@ -39,6 +39,10 @@
 ;; This defines the function cdargs and an alias cv
 
 ;;; Code:
+
+(eval-when-compile
+  (require 'tramp))
+
 (defgroup cdargs nil
   "Jump to directories quickly."
   :tag "CDargs"
@@ -109,13 +113,13 @@ quick access."
 (defalias 'cv 'cdargs)
 
 (defun cdargs--compose-remote-prefix ()
-  (with-parsed-tramp-file-name default-directory parsed
+  (with-parsed-tramp-file-name default-directory cdargs-tramp
     (tramp-make-tramp-file-name
-     parsed-method
-     parsed-user
-     parsed-host
+     cdargs-tramp-method
+     cdargs-tramp-user
+     cdargs-tramp-host
      "" ;localname empty for now
-     parsed-hop)))
+     cdargs-tramp-hop)))
 
 (defun cdargs--compose-prefix ()
   (if (tramp-tramp-file-p default-directory)
