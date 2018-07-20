@@ -117,7 +117,9 @@ quick access."
     (tramp-make-tramp-file-name
      cdargs-tramp-method
      cdargs-tramp-user
+     cdargs-tramp-domain
      cdargs-tramp-host
+     cdargs-tramp-port
      "" ;localname empty for now
      cdargs-tramp-hop)))
 
